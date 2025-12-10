@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes calculatorFloat {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            transition: background 0.5s ease;
+        }
+
+        body.theme-green {
+            background: linear-gradient(-45deg, #1a3a2e, #2d5a4a, #3a7359, #4a9d7f);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        body.theme-blue {
+            background: linear-gradient(-45deg, #0a3d62, #1e5f8c, #2980b9, #3498db);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        body.theme-red {
+            background: linear-gradient(-45deg, #5a1a1a, #8b2e2e, #c0392b, #e74c3c);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        body::before,
+        body::after {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+            animation: float 8s ease-in-out infinite;
+            transition: background 0.5s ease;
+        }
+
+        body.theme-green::before {
+            background: radial-gradient(circle, #2d5a4a, #1a3a2e);
+            top: -100px;
+            left: -100px;
+        }
+
+        body.theme-green::after {
+            background: radial-gradient(circle, #4a9d7f, #3a7359);
+            bottom: -100px;
+            right: -100px;
+            animation-delay: 4s;
+        }
+
+        body.theme-blue::before {
+            background: radial-gradient(circle, #1e5f8c, #0a3d62);
+            top: -100px;
+            left: -100px;
+        }
+
+        body.theme-blue::after {
+            background: radial-gradient(circle, #3498db, #2980b9);
+            bottom: -100px;
+            right: -100px;
+            animation-delay: 4s;
+        }
+
+        body.theme-red::before {
+            background: radial-gradient(circle, #8b2e2e, #5a1a1a);
+            top: -100px;
+            left: -100px;
+        }
+
+        body.theme-red::after {
+            background: radial-gradient(circle, #e74c3c, #c0392b);
+            bottom: -100px;
+            right: -100px;
+            animation-delay: 4s;
+        }
+
+        .theme-switcher {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        .theme-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.1);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .theme-btn.active {
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+        }
+
+        .theme-btn.green {
+            background: linear-gradient(135deg, #4a9d7f, #2d5a4a);
+        }
+
+        .theme-btn.blue {
+            background: linear-gradient(135deg, #3498db, #1e5f8c);
+        }
+
+        .theme-btn.red {
+            background: linear-gradient(135deg, #e74c3c, #8b2e2e);
+        }
+
+        .calculator {
+            background: rgba(26, 44, 37, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 100px rgba(74, 157, 127, 0.2);
+            padding: 20px;
+            width: 280px;
+            position: relative;
+            z-index: 1;
+            border: 2px solid rgba(74, 157, 127, 0.3);
+            animation: calculatorFloat 6s ease-in-out infinite;
+            transition: all 0.5s ease;
+        }
+
+        body.theme-blue .calculator {
+            background: rgba(10, 61, 98, 0.85);
+            border-color: rgba(52, 152, 219, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 100px rgba(52, 152, 219, 0.2);
+        }
+
+        body.theme-red .calculator {
+            background: rgba(90, 26, 26, 0.85);
+            border-color: rgba(231, 76, 60, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 100px rgba(231, 76, 60, 0.2);
+        }
+
+        .display {
+            background: linear-gradient(135deg, #1a3a2e 0%, #2d5a4a 100%);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: right;
+            word-wrap: break-word;
+            word-break: break-all;
+            min-height: 70px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(74, 157, 127, 0.2);
+            transition: all 0.5s ease;
+        }
+
+        body.theme-blue .display {
+            background: linear-gradient(135deg, #0a3d62 0%, #1e5f8c 100%);
+            border-color: rgba(52, 152, 219, 0.2);
+        }
+
+        body.theme-red .display {
+            background: linear-gradient(135deg, #5a1a1a 0%, #8b2e2e 100%);
+            border-color: rgba(231, 76, 60, 0.2);
+        }
+
+        .display-previous {
+            color: rgba(160, 214, 180, 0.7);
+            font-size: 14px;
+            min-height: 18px;
+            margin-bottom: 5px;
+        }
+
+        .display-current {
+            color: #a0d6b4;
+            font-size: 28px;
+            font-weight: 600;
+            min-height: 35px;
+            text-shadow: 0 2px 10px rgba(74, 157, 127, 0.5);
+            transition: all 0.5s ease;
+        }
+
+        body.theme-blue .display-current {
+            color: #7ec8e3;
+            text-shadow: 0 2px 10px rgba(52, 152, 219, 0.5);
+        }
+
+        body.theme-red .display-current {
+            color: #f5a9a0;
+            text-shadow: 0 2px 10px rgba(231, 76, 60, 0.5);
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            padding: 0;
+            height: 55px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            background: #f0f0f0;
+            color: #2d5a4a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-number {
+            background: rgba(45, 90, 74, 0.6);
+            color: #a0d6b4;
+            border: 1px solid rgba(74, 157, 127, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        body.theme-blue .btn-number {
+            background: rgba(30, 95, 140, 0.6);
+            color: #7ec8e3;
+            border-color: rgba(52, 152, 219, 0.3);
+        }
+
+        body.theme-red .btn-number {
+            background: rgba(139, 46, 46, 0.6);
+            color: #f5a9a0;
+            border-color: rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-operator {
+            background: linear-gradient(135deg, #4a9d7f 0%, #3a7359 100%);
+            color: #e8f5e9;
+            box-shadow: 0 4px 15px rgba(74, 157, 127, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        body.theme-blue .btn-operator {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        body.theme-red .btn-operator {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #5a8070 0%, #4a6d5f 100%);
+            color: #e8f5e9;
+            box-shadow: 0 4px 15px rgba(90, 128, 112, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        body.theme-blue .btn-clear {
+            background: linear-gradient(135deg, #2c7aad 0%, #1e5f8c 100%);
+            box-shadow: 0 4px 15px rgba(44, 122, 173, 0.4);
+        }
+
+        body.theme-red .btn-clear {
+            background: linear-gradient(135deg, #c0574e 0%, #a04238 100%);
+            box-shadow: 0 4px 15px rgba(192, 87, 78, 0.4);
+        }
+
+        .btn-equals {
+            background: linear-gradient(135deg, #6db88a 0%, #5a9d7f 100%);
+            color: #e8f5e9;
+            grid-column: span 2;
+            box-shadow: 0 4px 15px rgba(109, 184, 138, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        body.theme-blue .btn-equals {
+            background: linear-gradient(135deg, #52b8db 0%, #3498db 100%);
+            box-shadow: 0 4px 15px rgba(82, 184, 219, 0.4);
+        }
+
+        body.theme-red .btn-equals {
+            background: linear-gradient(135deg, #f06c5e 0%, #e74c3c 100%);
+            box-shadow: 0 4px 15px rgba(240, 108, 94, 0.4);
+        }
+
+        .btn-span-2 {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body class="theme-green">
+    <div class="theme-switcher">
+        <button class="theme-btn green active" onclick="switchTheme('green')" title="Lofi Green"></button>
+        <button class="theme-btn blue" onclick="switchTheme('blue')" title="Sea Blue"></button>
+        <button class="theme-btn red" onclick="switchTheme('red')" title="Fire Red"></button>
+    </div>
+    
+    <div class="calculator">
+        <div class="display">
+            <div class="display-previous" id="previous-operand"></div>
+            <div class="display-current" id="current-operand">0</div>
+        </div>
+        <div class="buttons">
+            <button class="btn-clear" onclick="calculator.clear()">AC</button>
+            <button class="btn-operator" onclick="calculator.delete()">DEL</button>
+            <button class="btn-operator" onclick="calculator.chooseOperation('%')">%</button>
+            <button class="btn-operator" onclick="calculator.chooseOperation('÷')">÷</button>
+            
+            <button class="btn-number" onclick="calculator.appendNumber('7')">7</button>
+            <button class="btn-number" onclick="calculator.appendNumber('8')">8</button>
+            <button class="btn-number" onclick="calculator.appendNumber('9')">9</button>
+            <button class="btn-operator" onclick="calculator.chooseOperation('×')">×</button>
+            
+            <button class="btn-number" onclick="calculator.appendNumber('4')">4</button>
+            <button class="btn-number" onclick="calculator.appendNumber('5')">5</button>
+            <button class="btn-number" onclick="calculator.appendNumber('6')">6</button>
+            <button class="btn-operator" onclick="calculator.chooseOperation('-')">-</button>
+            
+            <button class="btn-number" onclick="calculator.appendNumber('1')">1</button>
+            <button class="btn-number" onclick="calculator.appendNumber('2')">2</button>
+            <button class="btn-number" onclick="calculator.appendNumber('3')">3</button>
+            <button class="btn-operator" onclick="calculator.chooseOperation('+')">+</button>
+            
+            <button class="btn-number btn-span-2" onclick="calculator.appendNumber('0')">0</button>
+            <button class="btn-number" onclick="calculator.appendNumber('.')">.</button>
+            <button class="btn-equals" onclick="calculator.compute()">=</button>
+        </div>
+    </div>
+
+    <script>
+        class Calculator {
+            constructor(previousOperandElement, currentOperandElement) {
+                this.previousOperandElement = previousOperandElement;
+                this.currentOperandElement = currentOperandElement;
+                this.clear();
+            }
+
+            clear() {
+                this.currentOperand = '0';
+                this.previousOperand = '';
+                this.operation = undefined;
+                this.updateDisplay();
+            }
+
+            delete() {
+                if (this.currentOperand === '0') return;
+                this.currentOperand = this.currentOperand.toString().slice(0, -1);
+                if (this.currentOperand === '') this.currentOperand = '0';
+                this.updateDisplay();
+            }
+
+            appendNumber(number) {
+                if (number === '.' && this.currentOperand.includes('.')) return;
+                if (this.currentOperand === '0' && number !== '.') {
+                    this.currentOperand = number.toString();
+                } else {
+                    this.currentOperand = this.currentOperand.toString() + number.toString();
+                }
+                this.updateDisplay();
+            }
+
+            chooseOperation(operation) {
+                if (this.currentOperand === '') return;
+                if (this.previousOperand !== '') {
+                    this.compute();
+                }
+                this.operation = operation;
+                this.previousOperand = this.currentOperand;
+                this.currentOperand = '0';
+                this.updateDisplay();
+            }
+
+            compute() {
+                let computation;
+                const prev = parseFloat(this.previousOperand);
+                const current = parseFloat(this.currentOperand);
+                if (isNaN(prev) || isNaN(current)) return;
+
+                switch (this.operation) {
+                    case '+':
+                        computation = prev + current;
+                        break;
+                    case '-':
+                        computation = prev - current;
+                        break;
+                    case '×':
+                        computation = prev * current;
+                        break;
+                    case '÷':
+                        computation = prev / current;
+                        break;
+                    case '%':
+                        computation = prev % current;
+                        break;
+                    default:
+                        return;
+                }
+
+                this.currentOperand = computation.toString();
+                this.operation = undefined;
+                this.previousOperand = '';
+                this.updateDisplay();
+            }
+
+            updateDisplay() {
+                this.currentOperandElement.textContent = this.currentOperand;
+                if (this.operation != null) {
+                    this.previousOperandElement.textContent = 
+                        `${this.previousOperand} ${this.operation}`;
+                } else {
+                    this.previousOperandElement.textContent = '';
+                }
+            }
+        }
+
+        const previousOperandElement = document.getElementById('previous-operand');
+        const currentOperandElement = document.getElementById('current-operand');
+        const calculator = new Calculator(previousOperandElement, currentOperandElement);
+
+        // Theme switcher
+        function switchTheme(theme) {
+            const body = document.body;
+            body.className = `theme-${theme}`;
+            
+            // Update active state on buttons
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.theme-btn.${theme}`).classList.add('active');
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') calculator.appendNumber(e.key);
+            if (e.key === '.') calculator.appendNumber(e.key);
+            if (e.key === '+' || e.key === '-') calculator.chooseOperation(e.key);
+            if (e.key === '*') calculator.chooseOperation('×');
+            if (e.key === '/') {
+                e.preventDefault();
+                calculator.chooseOperation('÷');
+            }
+            if (e.key === '%') calculator.chooseOperation('%');
+            if (e.key === 'Enter' || e.key === '=') calculator.compute();
+            if (e.key === 'Escape') calculator.clear();
+            if (e.key === 'Backspace') calculator.delete();
+        });
+    </script>
+</body>
+</html>
